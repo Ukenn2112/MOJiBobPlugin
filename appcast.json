@@ -4,8 +4,8 @@
         {
             "version": "0.2.1",
             "desc": "更换更新检测源",
-            "sha256": "4edd7621645ced3fb98df884dd1e684d9deb5b283d460168612391246c2fb09b",
-            "url": "https://github.com/Ukenn2112/MOJiBobPlugin/releases/download/v0.2.0/moji-dictionary.bobplugin",
+            "sha256": "de6cb2e8e0f2a9c3005a144ce8d4c1ec9da38f158989280bb58223bc35eeec81",
+            "url": "https://github.com/Ukenn2112/MOJiBobPlugin/releases/download/v0.2.1/moji-dictionary.bobplugin",
             "minBobVersion": "0.5.0"
         },
         {
