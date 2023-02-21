@@ -1,0 +1,12 @@
+{
+    "identifier": "com.ukenn.moji.dictionary",
+    "versions": [
+        {
+            "version": "0.1.0",
+            "desc": "初始版本",
+            "sha256": "02f4e10569c0ffbe3e87c873c071d1a667c79e8980e9502d09691934fdb77651",
+            "url": "https://github.com/Ukenn2112/MOJiBobPlugin/releases/download/v0.1.0/moji-dictionary.bobplugin",
+            "minBobVersion": "0.5.0"
+        }
+    ]
+}
