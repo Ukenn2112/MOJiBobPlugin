@@ -20,10 +20,12 @@ function translate(query, completion) {
     "X-Parse-Application-Id": "E62VyFVLMiW7kvbtVq3p",
   };
   (async () => {
+    $log.info(`搜索请求 query.text: ${query.text}`);
     const search_resp = await $http.request({
       method: "POST",
       url: "https://api.mojidict.com/parse/functions/search-all",
       header,
+      timeout: 10,
       body: {
         "types": ["102", "103", "106", "431"],
         "text": query.text,
@@ -35,26 +37,28 @@ function translate(query, completion) {
       completion({
         error: {
           type: "api",
-          message: `API 搜索接口响应错误 - ${response.data.msg}`,
-          addtion: JSON.stringify(response),
+          message: `API 搜索接口响应错误 - ${search_resp.error.localizedDescription}`,
+          addtion: search_resp.error.localizedFailureReason,
         },
       });
     } else {
-      const search_data = search_resp.data.result.result.word.searchResult[0];
+      $log.info(`搜索请求结果 search_data: ${JSON.stringify(search_resp.data)}`);
+      const search_data = search_resp.data.result.result.word.searchResult;
       if (search_data.length === 0) {
         completion({
           error: {
-            type: "api",
-            message: "接口未返回结果",
+            type: "notFound",
+            message: "未找到结果",
           },
         });
         return;
       } 
-      const target_id = search_data.targetId
+      const target_id = search_data[0].targetId
       const world_resp = await $http.request({
         method: "POST",
         url: "https://api.mojidict.com/parse/functions/ui-union-apis-word",
         header,
+        timeout: 10,
         body: {
           "skipAccessories": false,
           "objectId": target_id,
@@ -66,8 +70,8 @@ function translate(query, completion) {
         completion({
           error: {
             type: "api",
-            message: `API 搜索接口响应错误 - ${response.data.msg}`,
-            addtion: JSON.stringify(response),
+            message: `API 单词详情接口响应错误 - ${search_resp.error.localizedDescription}`,
+            addtion: search_resp.error.localizedFailureReason,
           },
         });
         return;
@@ -149,6 +153,7 @@ function translate(query, completion) {
         method: "POST",
         url: "https://api.mojidict.com/parse/functions/tts-fetch",
         header,
+        timeout: 10,
         body: {
           "voiceId": "f000",
           "g_os": "iOS",
@@ -156,10 +161,12 @@ function translate(query, completion) {
           "tarType": 102
         },
       });
-      const tts_data = tts_resp.data.result;
-      if (tts_data.code === 200) {
-        to_tts["type"] = "url";
-        to_tts["value"] = tts_data.result.url;
+      if (!world_resp.error) {
+        const tts_data = tts_resp.data.result;
+        if (tts_data.code === 200) {
+          to_tts["type"] = "url";
+          to_tts["value"] = tts_data.result.url;
+        }
       }
       completion({
         result: {
