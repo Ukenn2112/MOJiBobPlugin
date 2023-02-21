@@ -116,7 +116,7 @@ function translate(query, completion) {
         for (const form of _form) {
             to_dict["exchanges"].push({
                 "name": form.name,
-                "words": form.form
+                "words": [form.form]
             });
         }
       }
@@ -168,6 +168,7 @@ function translate(query, completion) {
           to_tts["value"] = tts_data.result.url;
         }
       }
+      $log.info(`单词详情请求结果 to_dict: ${JSON.stringify(to_dict)}`);
       completion({
         result: {
           from: query.detectFrom,
