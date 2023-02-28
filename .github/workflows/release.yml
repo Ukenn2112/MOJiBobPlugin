@@ -34,7 +34,7 @@ jobs:
         run: |
           git config --global user.name 'Ukenn2112'
           git config --global user.email 'duola2002@gmail.com'
-          git add .
+          git add appcast.json
           git commit -am 'update appcast.json'
 
       - name: Push changes
