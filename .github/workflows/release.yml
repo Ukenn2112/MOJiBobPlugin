@@ -1,0 +1,58 @@
+name: Release Plugin
+on:
+  push:
+    paths:
+      - "src/info.json"
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up Node.js environment
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14.x"
+      - name: Install dependencies
+        run: npm install
+      - name: Build plugin
+        run: npm run build
+      - name: Calculate sha256
+        run: echo ::set-output name=sha256::$(openssl sha256 dist/moji-dictionary.bobplugin | awk '{print $NF}')
+        id: sha
+      - name: Update appcast.json
+        uses: ahmadawais/create-appcast-action@v1.1.1
+        with:
+          version: ${{fromJson(file("src/info.json")).version}}
+          desc: ${{github.event.head_commit.message}}
+          url: https://github.com/Ukenn2112/MOJiBobPlugin/releases/download/v${{fromJson(file("src/info.json")).version}}/moji-dictionary.bobplugin
+          sha256: ${{steps.sha.outputs.sha256}}
+          appcast_file: appcast.json
+          min_bob_version: ${{fromJson(file("src/info.json")).minBobVersion}}
+          identifier: ${{fromJson(file("src/info.json")).identifier}}
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{fromJson(file("src/info.json")).version}}
+          release_name: v${{fromJson(file("src/info.json")).version}}
+          body: ${{github.event.head_commit.message}}
+          draft: false
+          prerelease: false
+      - name: Upload plugin artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: moji-dictionary-plugin
+          path: dist/moji-dictionary.bobplugin
+      - name: Attach artifact to release
+        id: attach_artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/moji-dictionary.bobplugin
+          asset_name: moji-dictionary.bobplugin
+          asset_content_type: application/zip
