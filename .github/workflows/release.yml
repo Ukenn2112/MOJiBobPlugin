@@ -7,52 +7,47 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Set up Node.js environment
-        uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
         with:
-          node-version: "14.x"
-      - name: Install dependencies
-        run: npm install
-      - name: Build plugin
-        run: npm run build
-      - name: Calculate sha256
-        run: echo ::set-output name=sha256::$(openssl sha256 dist/moji-dictionary.bobplugin | awk '{print $NF}')
-        id: sha
+          fetch-depth: 0
+
+      - name: Get version
+        id: get_version
+        uses: battila7/get-version-action@v2
+
+      - name: Package plugin
+        run: mkdir release && zip -j -r release/moji-dictionary.bobplugin ./src/*
+
+      - name: Get last commit title
+        id: last-commit
+        run: echo "::set-output name=last_commit_title::$(git log -1 --pretty=format:%s)"
+
+      - run: git checkout -- src/
+
       - name: Update appcast.json
-        uses: ahmadawais/create-appcast-action@v1.1.1
+        id: run_script
+        run: |
+          output=$(python3 scripts/update_appcast.py "${{ steps.last-commit.outputs.last_commit_title }}")
+          echo "version=$output" >> $GITHUB_OUTPUT
+      
+      - name: Commit files
+        run: |
+          git config --global user.name 'Ukenn2112'
+          git config --global user.email 'duola2002@gmail.com'
+          git add .
+          git commit -am 'update appcast.json'
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
         with:
-          version: ${{fromJson(file("src/info.json")).version}}
-          desc: ${{github.event.head_commit.message}}
-          url: https://github.com/Ukenn2112/MOJiBobPlugin/releases/download/v${{fromJson(file("src/info.json")).version}}/moji-dictionary.bobplugin
-          sha256: ${{steps.sha.outputs.sha256}}
-          appcast_file: appcast.json
-          min_bob_version: ${{fromJson(file("src/info.json")).minBobVersion}}
-          identifier: ${{fromJson(file("src/info.json")).identifier}}
-      - name: Create release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
         with:
-          tag_name: v${{fromJson(file("src/info.json")).version}}
-          release_name: v${{fromJson(file("src/info.json")).version}}
-          body: ${{github.event.head_commit.message}}
-          draft: false
-          prerelease: false
-      - name: Upload plugin artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: moji-dictionary-plugin
-          path: dist/moji-dictionary.bobplugin
-      - name: Attach artifact to release
-        id: attach_artifact
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/moji-dictionary.bobplugin
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: release/moji-dictionary.bobplugin
           asset_name: moji-dictionary.bobplugin
-          asset_content_type: application/zip
+          tag: ${{ steps.run_script.outputs.version }}
+          overwrite: true
+          body: "${{ steps.last-commit.outputs.last_commit_title }}"

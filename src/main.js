@@ -79,7 +79,7 @@ function translate(query, completion) {
       const _world_data = world_resp.data.result;
       const world_data = _world_data.result[0];
       const to_dict = {};
-      to_dict["word"] = `${world_data.word.spell} ${world_data.word.accent}`;
+      to_dict["word"] = `${world_data.word.spell} ${world_data.word.accent || ""}`;
       to_dict["parts"] = [];
       if (world_data.word.pron) {
         to_dict["parts"].push({
