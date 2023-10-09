@@ -43,8 +43,8 @@ function translate(query, completion) {
       });
     } else {
       $log.info(`搜索请求结果 search_data: ${JSON.stringify(search_resp.data)}`);
-      const search_data = search_resp.data.result.result.word.searchResult;
-      if (search_data.length === 0 || search_data[0].isFree　=== undefined) {
+      const search_data = search_resp.data.result.result;
+      if (search_data.word === undefined || search_data.word.searchResult.length === 0 || search_data.word.searchResult[0].isFree　=== undefined) {
         completion({
           error: {
             type: "notFound",
@@ -53,7 +53,7 @@ function translate(query, completion) {
         });
         return;
       } 
-      const target_id = search_data[0].targetId
+      const target_id = search_data.word.searchResult[0].targetId
       const world_resp = await $http.request({
         method: "POST",
         url: "https://api.mojidict.com/parse/functions/ui-union-apis-word",
