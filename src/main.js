@@ -44,7 +44,7 @@ function translate(query, completion) {
     } else {
       $log.info(`搜索请求结果 search_data: ${JSON.stringify(search_resp.data)}`);
       const search_data = search_resp.data.result.result;
-      if (search_data.word === undefined || search_data.word.searchResult.length === 0 || search_data.word.searchResult[0].isFree　=== undefined) {
+      if (search_data.word === undefined || !Array.isArray(search_data.word)|| search_data.word.searchResult.length === 0 || search_data.word.searchResult[0].isFree　=== undefined) {
         completion({
           error: {
             type: "notFound",
