@@ -16,7 +16,7 @@ function supportLanguages() {
 function translate(query, completion) {
   const header = {
     "Content-Type": "application/json",
-    "User-Agent": "MOJiDict/20221111 CFNetwork/1399 Darwin/22.1.0",
+    "User-Agent": "MOJiDict/20231008 CFNetwork/1474 Darwin/23.0.0",
     "X-Parse-Application-Id": "E62VyFVLMiW7kvbtVq3p",
   };
   (async () => {
@@ -29,6 +29,8 @@ function translate(query, completion) {
       body: {
         "types": ["102", "103", "106", "431"],
         "text": query.text,
+        "inputMethod": 0,
+        "g_langEnv": "ja_zh-CN",
         "g_os": "iOS"
       },
     });
@@ -44,7 +46,7 @@ function translate(query, completion) {
     } else {
       $log.info(`搜索请求结果 search_data: ${JSON.stringify(search_resp.data)}`);
       const search_data = search_resp.data.result.result;
-      if (search_data.word === undefined || !Array.isArray(search_data.word)|| search_data.word.searchResult.length === 0 || search_data.word.searchResult[0].isFree　=== undefined) {
+      if (search_data.word === undefined || search_data.word.searchResult.length === 0 || search_data.word.searchResult[0].isFree　=== undefined) {
         completion({
           error: {
             type: "notFound",
