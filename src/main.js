@@ -46,7 +46,7 @@ function translate(query, completion) {
     } else {
       $log.info(`搜索请求结果 search_data: ${JSON.stringify(search_resp.data)}`);
       const search_data = search_resp.data.result.result;
-      if (search_data.word === undefined || search_data.word.searchResult.length === 0 || search_data.word.searchResult[0].isFree　=== undefined) {
+      if (search_data.word === undefined || search_data.word.searchResult.length === 0) {
         completion({
           error: {
             type: "notFound",
@@ -125,22 +125,24 @@ function translate(query, completion) {
       to_dict["additions"] = [];
       var num = 1;
       for (const detail of world_data.details) {
-        for (const subdetail of world_data.subdetails) {
-            if (detail.objectId === subdetail.detailsId) {
-                to_dict["additions"].push({
-                    "name": ``,
-                    "value": `${num}、[${detail.title.replace(/#/g, "·")}] ${subdetail.title}`
-                });
-                num += 1;
-                for (const example of world_data.examples) {
-                    if (example.subdetailsId === subdetail.objectId) {
-                        to_dict["additions"].push({
-                            "name": example.title,
-                            "value": example.trans || ""
-                        });
-                    }
-                }
-            }
+        if (world_data.subdetails) {
+          for (const subdetail of world_data.subdetails) {
+              if (detail.objectId === subdetail.detailsId) {
+                  to_dict["additions"].push({
+                      "name": ``,
+                      "value": `${num}、[${detail.title.replace(/#/g, "·")}] ${subdetail.title}`
+                  });
+                  num += 1;
+                  for (const example of world_data.examples) {
+                      if (example.subdetailsId === subdetail.objectId) {
+                          to_dict["additions"].push({
+                              "name": example.title,
+                              "value": example.trans || ""
+                          });
+                      }
+                  }
+              }
+          }
         }
       }
       if (world_data.word.tags) {
