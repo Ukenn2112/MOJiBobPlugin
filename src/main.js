@@ -23,16 +23,23 @@ function translate(query, completion) {
     $log.info(`搜索请求 query.text: ${query.text}`);
     const search_resp = await $http.request({
       method: "POST",
-      url: "https://api.mojidict.com/parse/functions/search-all",
+      url: "https://api.mojidict.com/parse/functions/union-api",
       header,
       timeout: 10,
       body: {
-        "types": ["102", "103", "106", "431"],
-        "text": query.text,
-        "inputMethod": 0,
-        "g_langEnv": "ja_zh-CN",
-        "g_os": "iOS"
+        g_ver: "v4.8.8.20240829",
+        g_os: "iOS",
+        functions: [
+          {
+            name: "search-all",
+            params: {
+              text: query.text,
+              types: ["102", "103", "106", "431"],
+            },
+          },
+        ],
       },
+
     });
 
     if (search_resp.error) {
@@ -45,7 +52,7 @@ function translate(query, completion) {
       });
     } else {
       $log.info(`搜索请求结果 search_data: ${JSON.stringify(search_resp.data)}`);
-      const search_data = search_resp.data.result.result;
+      const search_data = search_resp.data.result.results['search-all'].result;
       if (search_data.word === undefined || search_data.word.searchResult.length === 0) {
         completion({
           error: {
