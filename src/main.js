@@ -7,7 +7,9 @@ var items = [
 ];
 
 var langMap = new Map(items);
-var langMapReverse = new Map(items.map(([standardLang, lang]) => [lang, standardLang]));
+var langMapReverse = new Map(
+  items.map(([standardLang, lang]) => [lang, standardLang])
+);
 
 function supportLanguages() {
   return items.map(([standardLang, lang]) => standardLang);
@@ -39,7 +41,6 @@ function translate(query, completion) {
           },
         ],
       },
-
     });
 
     if (search_resp.error) {
@@ -51,9 +52,14 @@ function translate(query, completion) {
         },
       });
     } else {
-      $log.info(`搜索请求结果 search_data: ${JSON.stringify(search_resp.data)}`);
-      const search_data = search_resp.data.result.results['search-all'].result;
-      if (search_data.word === undefined || search_data.word.searchResult.length === 0) {
+      $log.info(
+        `搜索请求结果 search_data: ${JSON.stringify(search_resp.data)}`
+      );
+      const search_data = search_resp.data.result.results["search-all"].result;
+      if (
+        search_data.word === undefined ||
+        search_data.word.searchResult.length === 0
+      ) {
         completion({
           error: {
             type: "notFound",
@@ -61,18 +67,18 @@ function translate(query, completion) {
           },
         });
         return;
-      } 
-      const target_id = search_data.word.searchResult[0].targetId
+      }
+      const target_id = search_data.word.searchResult[0].targetId;
       const world_resp = await $http.request({
         method: "POST",
         url: "https://api.mojidict.com/parse/functions/ui-union-apis-word",
         header,
         timeout: 10,
         body: {
-          "skipAccessories": false,
-          "objectId": target_id,
-          "g_os": "iOS",
-          "isVerb3": true
+          skipAccessories: false,
+          objectId: target_id,
+          g_os: "iOS",
+          isVerb3: true,
         },
       });
       if (world_resp.error) {
@@ -88,45 +94,53 @@ function translate(query, completion) {
       const _world_data = world_resp.data.result;
       const world_data = _world_data.result[0];
       const to_dict = {};
-      to_dict["word"] = `${world_data.word.spell} ${world_data.word.accent || ""}`;
+      to_dict["word"] = `${world_data.word.spell} ${
+        world_data.word.accent || ""
+      }`;
       to_dict["parts"] = [];
       if (world_data.word.pron) {
         to_dict["parts"].push({
-            "part": "平假名",
-            "means": [`[${world_data.word.pron}]`]
+          part: "平假名",
+          means: [`[${world_data.word.pron}]`],
         });
       }
       if (world_data.word.romaji) {
         to_dict["parts"].push({
-            "part": "罗马音",
-            "means": [`[${world_data.word.romaji}]`]
+          part: "罗马音",
+          means: [`[${world_data.word.romaji}]`],
         });
       }
       to_dict["exchanges"] = [];
       if (_world_data.thesaurus) {
-        if (_world_data.thesaurus.synonyms && _world_data.thesaurus.synonyms.length !== 0) {
-            to_dict["exchanges"].push({
-                "name": "同义词",
-                "words": _world_data.thesaurus.synonyms
-            });
+        if (
+          _world_data.thesaurus.synonyms &&
+          _world_data.thesaurus.synonyms.length !== 0
+        ) {
+          to_dict["exchanges"].push({
+            name: "同义词",
+            words: _world_data.thesaurus.synonyms,
+          });
         }
-        if (_world_data.thesaurus.antonyms && _world_data.thesaurus.antonyms.length !== 0) {
-            to_dict["exchanges"].push({
-                "name": "反义词",
-                "words": _world_data.thesaurus.antonyms
-            });
+        if (
+          _world_data.thesaurus.antonyms &&
+          _world_data.thesaurus.antonyms.length !== 0
+        ) {
+          to_dict["exchanges"].push({
+            name: "反义词",
+            words: _world_data.thesaurus.antonyms,
+          });
         }
       }
       to_dict["exchanges"].push({
-        "name": "原形",
-        "words": [_world_data.conjugate.type]
+        name: "原形",
+        words: [_world_data.conjugate.type],
       });
       for (const _form of _world_data.conjugate.forms) {
         for (const form of _form) {
-            to_dict["exchanges"].push({
-                "name": form.name,
-                "words": [form.form]
-            });
+          to_dict["exchanges"].push({
+            name: form.name,
+            words: [form.form],
+          });
         }
       }
       to_dict["additions"] = [];
@@ -134,29 +148,31 @@ function translate(query, completion) {
       for (const detail of world_data.details) {
         if (world_data.subdetails) {
           for (const subdetail of world_data.subdetails) {
-              if (detail.objectId === subdetail.detailsId) {
+            if (detail.objectId === subdetail.detailsId) {
+              to_dict["additions"].push({
+                name: ``,
+                value: `${num}、[${detail.title.replace(/#/g, "·")}] ${
+                  subdetail.title
+                }`,
+              });
+              num += 1;
+              for (const example of world_data.examples) {
+                if (example.subdetailsId === subdetail.objectId) {
                   to_dict["additions"].push({
-                      "name": ``,
-                      "value": `${num}、[${detail.title.replace(/#/g, "·")}] ${subdetail.title}`
+                    name: example.title,
+                    value: example.trans || "",
                   });
-                  num += 1;
-                  for (const example of world_data.examples) {
-                      if (example.subdetailsId === subdetail.objectId) {
-                          to_dict["additions"].push({
-                              "name": example.title,
-                              "value": example.trans || ""
-                          });
-                      }
-                  }
+                }
               }
+            }
           }
         }
       }
       if (world_data.word.tags) {
         const tags = world_data.word.tags.split("#");
         to_dict["additions"].push({
-            "name": "标签",
-            "value": tags.join(" / ")
+          name: "标签",
+          value: tags.join(" / "),
         });
       }
       const to_tts = {};
@@ -166,10 +182,10 @@ function translate(query, completion) {
         header,
         timeout: 10,
         body: {
-          "voiceId": "f000",
-          "g_os": "iOS",
-          "tarId": target_id,
-          "tarType": 102
+          voiceId: "f000",
+          g_os: "iOS",
+          tarId: target_id,
+          tarType: 102,
         },
       });
       if (!world_resp.error) {
