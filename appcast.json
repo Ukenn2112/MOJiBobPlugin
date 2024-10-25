@@ -2,6 +2,13 @@
   "identifier": "com.ukenn.moji.dictionary",
   "versions": [
     {
+      "version": "1.0.2",
+      "desc": "修复main.js中空数组处理",
+      "sha256": "a3988f51b5991cb4ec30ec08717fa010b48464e95dbfe1ec537c2e70b48dd5d8",
+      "url": "https://github.com/Ukenn2112/MOJiBobPlugin/releases/download/v1.0.2/moji-dictionary.bobplugin",
+      "minBobVersion": "1.8.0"
+    },
+    {
       "version": "1.0.1",
       "desc": "Re.整体重构，规范代码，更新最新返回函数，请注意此版本开始Bob最低支持版本为1.8.0",
       "sha256": "ad0a7058c21168ada3bd4e2b264b4192eff9965b3ea1dcb970e30dc6e588d360",
