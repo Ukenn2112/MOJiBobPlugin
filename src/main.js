@@ -213,9 +213,9 @@ function parseWordDetails(wordDetailsResponse) {
   }
 
   let definitionIndex = 1;
-  const subdetailsMap = new Map(wordData.subdetails.map((subdetail) => [subdetail.detailsId, subdetail]));
-  const examplesMap = new Map(wordData.examples.map((example) => [example.subdetailsId, example]));
-  for (const detail of wordData.details) {
+  const subdetailsMap = new Map((wordData.subdetails || []).map((subdetail) => [subdetail.detailsId, subdetail]));
+  const examplesMap = new Map((wordData.examples || []).map((example) => [example.subdetailsId, example]));
+  for (const detail of wordData.details || []) {
     const subdetail = subdetailsMap.get(detail.objectId);
     if (subdetail) {
       toDict.additions.push({
