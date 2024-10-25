@@ -18,7 +18,7 @@ def update_appcast(message):
         "desc": message,
         "sha256": file_hash,
         "url": f"https://github.com/Ukenn2112/MOJiBobPlugin/releases/download/v{version}/moji-dictionary.bobplugin",
-        "minBobVersion": "0.5.0"
+        "minBobVersion": "1.8.0"
     }
     appcast_file = Path("appcast.json")
     if appcast_file.is_file():

@@ -6,14 +6,14 @@
       "desc": "Re.整体重构，规范代码，更新最新返回函数，请注意此版本开始Bob最低支持版本为1.8.0",
       "sha256": "ad0a7058c21168ada3bd4e2b264b4192eff9965b3ea1dcb970e30dc6e588d360",
       "url": "https://github.com/Ukenn2112/MOJiBobPlugin/releases/download/v1.0.1/moji-dictionary.bobplugin",
-      "minBobVersion": "0.5.0"
+      "minBobVersion": "1.8.0"
     },
     {
       "version": "1.0.0",
       "desc": "整体重构，规范代码，更新最新返回函数，请注意此版本开始Bob最低支持版本为1.8.0",
       "sha256": "35644495b810cfed437893b14dbcbd2208cc2207a016ce567dfd9e72eafa59a9",
       "url": "https://github.com/Ukenn2112/MOJiBobPlugin/releases/download/v1.0.0/moji-dictionary.bobplugin",
-      "minBobVersion": "0.5.0"
+      "minBobVersion": "1.8.0"
     },
     {
       "version": "0.3.2",
