@@ -69,7 +69,7 @@ function translate(query) {
         result: {
           from: query.detectFrom,
           to: query.detectTo,
-          toParagraphs: [wordDetailsResponse.data.esult.result[0].word.excerpt.replace(/#/g, "·")],
+          toParagraphs: [wordDetailsResponse.data.result.result[0].word.excerpt.replace(/#/g, "·")],
           toDict: toDict,
           toTTS: toTTS,
         },
