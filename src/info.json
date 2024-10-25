@@ -1,6 +1,6 @@
 {
     "identifier": "com.ukenn.moji.dictionary",
-    "version": "0.3.2",
+    "version": "1.0.0",
     "category": "translate",
     "name": "MOJi 辞書",
     "summary": "只为日语 - MOJi辞書（じしょ）",
@@ -8,6 +8,6 @@
     "author": "Ukenn",
     "homepage": "https://github.com/Ukenn2112/MOJiBobPlugin",
     "appcast": "https://raw.githubusercontent.com/Ukenn2112/MOJiBobPlugin/master/appcast.json",
-    "minBobVersion": "0.5.0",
+    "minBobVersion": "1.8.0",
     "options": []
 }

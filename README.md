@@ -6,7 +6,7 @@
 
 ## 使用方法
 
-1、安装 [Bob](https://bobtranslate.com/guide/#%E5%AE%89%E8%A3%85) (版本 >= 0.50)
+1、安装 [Bob](https://bobtranslate.com/guide/#%E5%AE%89%E8%A3%85) (版本 >= 1.8.0)
 
 2、前往 [Releases](https://github.com/Ukenn2112/MOJiBobPlugin/releases) 页下载此插件
 
