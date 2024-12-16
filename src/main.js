@@ -23,7 +23,7 @@ function supportLanguages() {
 
 /**
  * 设定返回超时时间
- * 
+ *
  * @return {number} 超时时间，单位为秒。
  */
 function pluginTimeoutInterval() {
@@ -32,7 +32,7 @@ function pluginTimeoutInterval() {
 
 /**
  * 主翻译函数，用于处理查询并返回结果。
- * 
+ *
  * https://bobtranslate.com/plugin/quickstart/translate.html
  *
  * @param {Object} query 翻译查询对象。
@@ -49,7 +49,7 @@ function pluginTimeoutInterval() {
 function translate(query) {
   const header = {
     "Content-Type": "application/json",
-    "User-Agent": "MOJiDict/20241019 CFNetwork/1568.300.61 Darwin/24.2.0",
+    "User-Agent": "MOJiDict/20241212 CFNetwork/1568.300.101 Darwin/24.2.0",
     "X-Parse-Application-Id": "E62VyFVLMiW7kvbtVq3p",
   };
 
@@ -58,7 +58,8 @@ function translate(query) {
       $log.info(`搜索请求 query.text: ${query.text}`);
       const searchResponse = await fetchSearchResults(query.text, header);
       const targetId = getTargetIdFromSearchResponse(searchResponse);
-      if (!targetId) return handleError(new KnownError("notFound", "未找到结果"), query);
+      if (!targetId)
+        return handleError(new KnownError("notFound", "未找到结果"), query);
 
       const wordDetailsResponse = await fetchWordDetails(targetId, header);
       const toDict = parseWordDetails(wordDetailsResponse);
@@ -69,7 +70,12 @@ function translate(query) {
         result: {
           from: query.detectFrom,
           to: query.detectTo,
-          toParagraphs: [wordDetailsResponse.data.result.result[0].word.excerpt.replace(/#/g, "·")],
+          toParagraphs: [
+            wordDetailsResponse.data.result.result[0].word.excerpt.replace(
+              /#/g,
+              "·"
+            ),
+          ],
           toDict: toDict,
           toTTS: toTTS,
         },
@@ -90,25 +96,19 @@ function translate(query) {
 async function fetchSearchResults(text, header) {
   return await $http.request({
     method: "POST",
-    url: "https://api.mojidict.com/parse/functions/union-api",
+    url: "https://api.mojidict.com/parse/functions/search-all",
     header,
     timeout: 10,
     body: {
-      g_ver: "v4.8.8.20240829",
+      inputMethod: 0,
+      g_ver: "v8.9.0",
       g_os: "iOS",
-      functions: [
-        {
-          name: "search-all",
-          params: {
-            text: text,
-            types: ["102", "103", "106", "431"],
-          },
-        },
-      ],
+      text: text,
+      highlight: true,
+      types: ["102", "103", "106", "431"],
     },
   });
 }
-
 
 /**
  * 搜索响应提取 targetId
@@ -118,11 +118,15 @@ async function fetchSearchResults(text, header) {
  */
 function getTargetIdFromSearchResponse(searchResponse) {
   if (searchResponse.error) {
-    throw new KnownError("api", `API 搜索接口响应错误 - ${searchResponse.error.localizedDescription}`, searchResponse.error.localizedFailureReason);
+    throw new KnownError(
+      "api",
+      `API 搜索接口响应错误 - ${searchResponse.error.localizedDescription}`,
+      searchResponse.error.localizedFailureReason
+    );
   }
 
   $log.info(`搜索请求结果 search_data: ${JSON.stringify(searchResponse.data)}`);
-  const searchData = searchResponse.data.result.results["search-all"].result;
+  const searchData = searchResponse.data.result.result;
   if (!searchData.word || searchData.word.searchResult.length === 0) {
     throw new KnownError("notFound", "未找到结果");
   }
@@ -159,7 +163,11 @@ async function fetchWordDetails(targetId, header) {
  */
 function parseWordDetails(wordDetailsResponse) {
   if (wordDetailsResponse.error) {
-    throw new KnownError("api", `API 单词详情接口响应错误 - ${wordDetailsResponse.error.localizedDescription}`, wordDetailsResponse.error.localizedFailureReason);
+    throw new KnownError(
+      "api",
+      `API 单词详情接口响应错误 - ${wordDetailsResponse.error.localizedDescription}`,
+      wordDetailsResponse.error.localizedFailureReason
+    );
   }
 
   const rawWordData = wordDetailsResponse.data.result;
@@ -185,13 +193,19 @@ function parseWordDetails(wordDetailsResponse) {
   }
 
   if (rawWordData.thesaurus) {
-    if (rawWordData.thesaurus.synonyms && rawWordData.thesaurus.synonyms.length !== 0) {
+    if (
+      rawWordData.thesaurus.synonyms &&
+      rawWordData.thesaurus.synonyms.length !== 0
+    ) {
       toDict.exchanges.push({
         name: "同义词",
         words: rawWordData.thesaurus.synonyms,
       });
     }
-    if (rawWordData.thesaurus.antonyms && rawWordData.thesaurus.antonyms.length !== 0) {
+    if (
+      rawWordData.thesaurus.antonyms &&
+      rawWordData.thesaurus.antonyms.length !== 0
+    ) {
       toDict.exchanges.push({
         name: "反义词",
         words: rawWordData.thesaurus.antonyms,
@@ -213,14 +227,23 @@ function parseWordDetails(wordDetailsResponse) {
   }
 
   let definitionIndex = 1;
-  const subdetailsMap = new Map((wordData.subdetails || []).map((subdetail) => [subdetail.detailsId, subdetail]));
-  const examplesMap = new Map((wordData.examples || []).map((example) => [example.subdetailsId, example]));
+  const subdetailsMap = new Map(
+    (wordData.subdetails || []).map((subdetail) => [
+      subdetail.detailsId,
+      subdetail,
+    ])
+  );
+  const examplesMap = new Map(
+    (wordData.examples || []).map((example) => [example.subdetailsId, example])
+  );
   for (const detail of wordData.details || []) {
     const subdetail = subdetailsMap.get(detail.objectId);
     if (subdetail) {
       toDict.additions.push({
         name: ``,
-        value: `${definitionIndex}、[${detail.title.replace(/#/g, "·")}] ${subdetail.title}`,
+        value: `${definitionIndex}、[${detail.title.replace(/#/g, "·")}] ${
+          subdetail.title
+        }`,
       });
       definitionIndex += 1;
       const example = examplesMap.get(subdetail.objectId);
@@ -300,7 +323,9 @@ class KnownError extends Error {
 function handleError(err, query) {
   if (!err.type) {
     err.type = "unknown";
-    err.message = err.message + "\n\n请尝试重新查询或联系我们。\nhttps://github.com/Ukenn2112/MOJiBobPlugin/issues/new";
+    err.message =
+      err.message +
+      "\n\n请尝试重新查询或联系我们。\nhttps://github.com/Ukenn2112/MOJiBobPlugin/issues/new";
   }
   query.onCompletion({
     error: {
