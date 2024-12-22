@@ -2,6 +2,13 @@
   "identifier": "com.ukenn.moji.dictionary",
   "versions": [
     {
+      "version": "1.0.4",
+      "desc": "更新版本号至1.0.4，增强API响应处理，添加错误处理逻辑",
+      "sha256": "985a87c71ee6421af9ee3446ba01af3128f074d7bd860c1e0f6063ad367a09c4",
+      "url": "https://github.com/Ukenn2112/MOJiBobPlugin/releases/download/v1.0.4/moji-dictionary.bobplugin",
+      "minBobVersion": "1.8.0"
+    },
+    {
       "version": "1.0.3",
       "desc": "更新版本号至1.0.3，优化代码格式，修正API请求参数",
       "sha256": "c26a9c23d6fa202a13191b1564e841c287918c15628bfdd59d7b6591a26d3b1f",
