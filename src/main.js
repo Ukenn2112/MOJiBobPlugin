@@ -117,6 +117,13 @@ async function fetchSearchResults(text, header) {
  * @return {string} 单词的 target ID。
  */
 function getTargetIdFromSearchResponse(searchResponse) {
+  if (!searchResponse || !searchResponse.data) {
+    throw new KnownError(
+      "api",
+      "API 搜索接口返回数据为空",
+      "请检查网络连接或 API 接口状态"
+    );
+  }
   if (searchResponse.error) {
     throw new KnownError(
       "api",
@@ -126,11 +133,14 @@ function getTargetIdFromSearchResponse(searchResponse) {
   }
 
   $log.info(`搜索请求结果 search_data: ${JSON.stringify(searchResponse.data)}`);
-  const searchData = searchResponse.data.result.result;
-  if (!searchData.word || searchData.word.searchResult.length === 0) {
+  const searchResult = searchResponse.data?.result?.result?.word?.searchResult;
+  if (!searchResult || searchResult.length === 0) {
     throw new KnownError("notFound", "未找到结果");
   }
-  return searchData.word.searchResult[0].targetId;
+  if (!searchResult[0]?.targetId) {
+    throw new KnownError("api", "搜索结果格式错误", "返回数据中缺少 targetId");
+  }
+  return searchResult[0].targetId;
 }
 
 /**
@@ -299,7 +309,14 @@ async function fetchTTS(targetId, header) {
   return ttsDetails;
 }
 
-// 已知错误键
+/**
+ * 自定义错误类
+ * 
+ * @param {'unknown'|'param'|'unsupportedLanguage'|'secretKey'|'network'|'api'|'notFound'} type 错误类型。
+ * @param {string} message 错误信息。
+ * @param {any=} addtion 附加信息。
+ * @param {string=} troubleshootingLink 故障排除的链接。
+ */
 class KnownError extends Error {
   constructor(type, message, addtion, troubleshootingLink) {
     super(message);
